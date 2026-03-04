@@ -1,0 +1,145 @@
+ <!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تطبيق الموسيقى المحلي</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    header {
+      background: #283593;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    main {
+      max-width: 500px;
+      background: #fff;
+      margin: 2rem auto;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    .file-upload {
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .tracks-list {
+      margin: 1rem 0;
+      list-style-type: none;
+      padding: 0;
+    }
+    .track-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3rem 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .track-item:last-child {
+      border-bottom: none;
+    }
+    .play-btn {
+      background: #283593;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .play-btn:hover {
+      background: #5c6bc0;
+    }
+    audio {
+      width: 100%;
+      margin-top: 1rem;
+      outline: none;
+    }
+    @media (max-width: 600px) {
+      main {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>تطبيق الموسيقى المحلي</h1>
+  </header>
+  <main>
+    <form class="file-upload" id="uploadForm" autocomplete="off">
+      <label for="audioInput">رفع ملفات موسيقى (MP3):
+        <input type="file" id="audioInput" accept="audio/*" multiple>
+      </label>
+    </form>
+    <section>
+      <h2>الأغاني المخزنة:</h2>
+      <ul class="tracks-list" id="tracksList"></ul>
+    </section>
+    <audio id="audioPlayer" controls preload="none" aria-label="مُشغل الموسيقى"></audio>
+  </main>
+  <script>
+    const audioInput = document.getElementById('audioInput');
+    const tracksList = document.getElementById('tracksList');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    // Store files as objects: { name, url }
+    let tracks = [];
+
+    function updateTrackList() {
+      tracksList.innerHTML = "";
+      if (tracks.length === 0) {
+        tracksList.innerHTML = "<li>لا توجد أغاني بعد.</li>";
+        return;
+      }
+      tracks.forEach((track, idx) => {
+        const li = document.createElement('li');
+        li.className = 'track-item';
+        li.innerHTML = `
+          <span>${track.name}</span>
+          <button type="button" class="play-btn" data-idx="${idx}">تشغيل</button>
+        `;
+        tracksList.appendChild(li);
+      });
+    }
+
+    audioInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        if (file.type.startsWith('audio/')) {
+          const url = URL.createObjectURL(file);
+          tracks.push({ name: file.name, url });
+        }
+      });
+      updateTrackList();
+      // Reset input to allow re-uploading
+      audioInput.value = "";
+    });
+
+    tracksList.addEventListener('click', function(e) {
+      if (e.target.classList.contains('play-btn')) {
+        const idx = e.target.getAttribute('data-idx');
+        if (tracks[idx]) {
+          audioPlayer.src = tracks[idx].url;
+          audioPlayer.play();
+        }
+      }
+    });
+
+    // Initialize
+    updateTrackList();
+  </script>
+</body>
+</html>
